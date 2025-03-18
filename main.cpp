@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <set>
 
 using namespace std;
 
@@ -37,7 +38,7 @@ vector<DataPoint> readFile(const string& filename){
 }
 
 
-// Function to print first two data points
+// funct print out first 2 lines in the dataset for debugging
 void printSampleData(const vector<DataPoint>& dataset){
     cout << "first two lines: ";
     for (size_t i = 0; i < min(dataset.size(), size_t(2)); i++){
@@ -49,8 +50,28 @@ void printSampleData(const vector<DataPoint>& dataset){
     }
 }
 
-void forwardSearch(){
+void forwardSearch(const vector<DataPoint>& dataset){
     cout<< "Running Forward Search"<<endl;
+    set<int>currFeatures;//empty set to start 
+    int numFeatures= dataset[0].features.size();
+    for(int i=1; i<=numFeatures; i++){
+        int addFeat = -1;
+        double currAccuracy =0; //current accuracy
+        for(int j=1; j<=numFeatures; j++){
+            if(currFeatures.find(j)==currFeatures.end()){
+                cout<< "--Considering adding feature"<<j<< endl;
+                double accuracy=0.0;//NEED TO MAKE NEAREST EINGHTBOR
+                if(accuracy > currAccuracy){
+                    currAccuracy= accuracy;
+                    addFeat= j;
+                }
+            }
+        }
+        if(addFeat != -1){
+            currFeatures.insert(addFeat);
+            cout<<"On level "<< i << " I added feature "<< addFeat<<endl;
+        }
+    }
     cout<< "End of Forward Search"<<endl;
 }
 
@@ -86,7 +107,7 @@ int main(){
 
     if(userInput==1){
         //FORWARD SEARCH
-        forwardSearch();
+        forwardSearch(dataset);
     }else if( userInput ==2){
         //BACKWARDS SEARCH
         
@@ -94,7 +115,8 @@ int main(){
         cout<< "Invalid input"<<endl;
         return 0;
     }
-    printSampleData(dataset);
+
+    printSampleData(dataset);//for debugign
 
     return 0;
 }
