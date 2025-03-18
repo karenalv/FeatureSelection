@@ -1,19 +1,43 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
-#include <string>
+#include <sstream>
 
 using namespace std;
 
-void forwardSearch(){
-    cout<< "Running Forward Search"<<endl;
 
+struct DataPoint{
+    int label; //class 1 or 2 dep on first column of data set
+    vector<double> features;  //feature vals
+};
 
+vector<DataPoint> readFile(const string& filename){
+    ifstream file(filename);
+    if(!file){
+        cout << "Error: Can't open"<<filename<<endl;
+        exit(1);
+    }
+    vector<DataPoint> dataset;
+    string line;
 
-    cout<< "End of Forward Search"<<endl;
+    while (getline(file, line)){ //read line by line
+        stringstream ss(line);
+        DataPoint data;
+        ss >>data.label; //clas lable
+        double value;
+        while (ss >> value){ //read feature vals
+            data.features.push_back(value);
+        }
+        dataset.push_back(data);
+    }
+    file.close();
+    return dataset;
 }
 
+void forwardSearch(){
+    cout<< "Running Forward Search"<<endl;
+    cout<< "End of Forward Search"<<endl;
+}
 
 
 int main(){
@@ -26,27 +50,24 @@ int main(){
 
     cout<< "Please choose which data set you would like to use:"<<endl;
     cout<< "1. Small Dataset"<<endl<< "2. Large Dataset"<<endl;
-    int dtset;
-    cin>> dtset;
+    int dataChoice;
+    cin>> dataChoice;
     cout<<endl;
 
-    string filename;
-    if(dtset==1){
-        filename="CS170_Small_Data__74.txt";
-    } 
-    else if(dtset==2){
-        filename="CS170_Large_Data__119.txt";
-    } 
+
+    vector<DataPoint> dataset;
+
+    if(dataChoice==1){
+        dataset = readFile("CS170_Small_Data__74.txt");
+    }
+    else if(dataChoice==2){
+        dataset =readFile("CS170_Large_Data__119.txt");
+    }
     else{
-        cout<< "Invalid dataset choice"<<endl;
+        cout<< "Invalid dataset choice."<<endl;
         return 0;
     }
-
-    ifstream file(filename);
-    if(!file){
-        cerr<< "Error: can't open file "<< filename<<endl;
-        return 1;
-    }
+    
 
     if(userInput==1){
         //FORWARD SEARCH
