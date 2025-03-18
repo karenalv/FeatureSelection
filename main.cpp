@@ -13,25 +13,40 @@ struct DataPoint{
 
 vector<DataPoint> readFile(const string& filename){
     ifstream file(filename);
-    if(!file){
-        cout << "Error: Can't open"<<filename<<endl;
+    if (!file) {
+        cout << "Error: Can't open." << filename << endl;
         exit(1);
     }
     vector<DataPoint> dataset;
     string line;
-
-    while (getline(file, line)){ //read line by line
+    while (getline(file, line)){  //read line by line
         stringstream ss(line);
         DataPoint data;
-        ss >>data.label; //clas lable
+        ss>>ws;
+        double tempLabel;//mkaes first into double so it doesnt get mistread
+        ss >> tempLabel;
+        data.label = static_cast<int>(tempLabel);
         double value;
-        while (ss >> value){ //read feature vals
+        while (ss >> value){
             data.features.push_back(value);
         }
         dataset.push_back(data);
     }
     file.close();
     return dataset;
+}
+
+
+// Function to print first two data points
+void printSampleData(const vector<DataPoint>& dataset){
+    cout << "first two lines: ";
+    for (size_t i = 0; i < min(dataset.size(), size_t(2)); i++){
+        cout << "class:"<< dataset[i].label<< " |features:";
+        for (double feature : dataset[i].features) {
+            cout << feature << " ";
+        }
+        cout << endl;
+    }
 }
 
 void forwardSearch(){
@@ -79,6 +94,7 @@ int main(){
         cout<< "Invalid input"<<endl;
         return 0;
     }
-    
+    printSampleData(dataset);
+
     return 0;
 }
