@@ -20,6 +20,7 @@ vector<DataPoint> readFile(const string& filename){
     }
     vector<DataPoint> dataset;
     string line;
+
     while (getline(file, line)){  //read line by line
         stringstream ss(line);
         DataPoint data;
@@ -33,6 +34,7 @@ vector<DataPoint> readFile(const string& filename){
         }
         dataset.push_back(data);
     }
+
     file.close();
     return dataset;
 }
@@ -75,11 +77,39 @@ void forwardSearch(const vector<DataPoint>& dataset){
     cout<< "End of Forward Search"<<endl;
 }
 
+void backwardsElimination(const vector<DataPoint>& dataset){
+cout<< "Running Backwards Elimination"<<endl;
+    int numFeatures= dataset[0].features.size();
+    set<int>currFeatures; //empty set to start 
+    for(int i = 1; i<=numFeatures; i++){///adding features to the beginign so can delete
+        currFeatures.insert(i);
+    }
+    for(int i=numFeatures; i>0; i--){ // legit jsut opp of fowrads search
+        int deleteFeat = -1;
+        double currAccuracy =0; //current accuracy
+        for(int j=1; j<=numFeatures; j++){
+            if(currFeatures.find(j) !=currFeatures.end()){
+                cout<< "--Considering removing feature"<<j<< endl;
+                double accuracy=0.0;
+                if(accuracy > currAccuracy){
+                    currAccuracy= accuracy;
+                    deleteFeat = j;
+                }
+            }
+        }
+        if(deleteFeat != -1){
+            currFeatures.erase(deleteFeat);
+            cout<<"On level "<< i << " I removed feature "<< deleteFeat<<endl;
+        }
+    }
+    cout<< "End of Backwards Elimination"<<endl;
+}
+
 
 int main(){
     cout<< "Feature Selection with Nearest Neighbor"<<endl;
     cout<< "Please choose which search you would like to try:"<<endl;
-    cout<< "1. Forward Search"<<endl<< "2.Backwards Search"<<endl;
+    cout<< "1. Forward Search"<<endl<< "2.Backwards Elimination"<<endl;
     int userInput;
     cin>> userInput;
     cout<<endl;
@@ -109,8 +139,8 @@ int main(){
         //FORWARD SEARCH
         forwardSearch(dataset);
     }else if( userInput ==2){
-        //BACKWARDS SEARCH
-        
+        //BACKWARDS ELIMINATION
+        backwardsElimination(dataset);
     }else{
         cout<< "Invalid input"<<endl;
         return 0;
