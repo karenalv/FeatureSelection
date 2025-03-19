@@ -132,7 +132,7 @@ void forwardSearch(const vector<DataPoint>& dataset){
     for (int feature : currFeatures) {
         cout << feature << " ";
     }
-    cout << endl;
+    cout<<endl<<"Final Accuracy: "<<bestAccuracy<< endl;
     cout<< "End of Forward Search"<<endl;
 }
 
