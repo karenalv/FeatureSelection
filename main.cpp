@@ -3,6 +3,8 @@
 #include <vector>
 #include <sstream>
 #include <set>
+#include <cmath>
+#include <limits>
 
 using namespace std;
 
@@ -52,6 +54,36 @@ void printSampleData(const vector<DataPoint>& dataset){
     }
 }
 
+//using psdueo code and structure from Prof Eamonn's project 2 briefing
+double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFeat, int addFeat){
+    int correctClassif=0;
+    for(int i =0; i<dataset.size();i++){
+        const DataPoint& objToClassify=dataset[i];
+        int trueClassification = objToClassify.label;
+        double nnDistance = numeric_limits<double>::infinity();
+        int nnLabel = -1;
+        for(int j=0; j< dataset.size(); j++){
+            if(j ==1) continue;
+            vector<double> tempFeat = dataset[j].features;
+            for(int k = 0; k<tempFeat.size(); k++){
+                if((currFeat.count(k+1)==0 )&& (k+1!= addFeat)){
+                    tempFeat[k]=0;
+                }
+            }
+            double distance =0.0;
+            for(int k=0; k<tempFeat.size(); k++){
+                double diff= objToClassify.features[k] - tempFeat[k];
+                distance += diff * diff;
+            }
+            distance= sqrt(distance);
+        }
+    }
+
+
+    return static_cast<double>(correctClassif)/dataset.size();
+}
+
+//using pseudo code and structure from Prof Eamonn's project 2 briefing
 void forwardSearch(const vector<DataPoint>& dataset){
     cout<< "Running Forward Search"<<endl;
     set<int>currFeatures;//empty set to start 
@@ -62,7 +94,7 @@ void forwardSearch(const vector<DataPoint>& dataset){
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j)==currFeatures.end()){
                 cout<< "--Considering adding feature"<<j<< endl;
-                double accuracy=0.0;//NEED TO MAKE NEAREST EINGHTBOR
+                double accuracy= crossValidation(dataset, currFeatures, j);
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     addFeat= j;
@@ -77,6 +109,7 @@ void forwardSearch(const vector<DataPoint>& dataset){
     cout<< "End of Forward Search"<<endl;
 }
 
+//using pseudo code and structure from Prof Eamonn's project 2 briefing
 void backwardsElimination(const vector<DataPoint>& dataset){
 cout<< "Running Backwards Elimination"<<endl;
     int numFeatures= dataset[0].features.size();
@@ -90,7 +123,7 @@ cout<< "Running Backwards Elimination"<<endl;
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j) !=currFeatures.end()){
                 cout<< "--Considering removing feature"<<j<< endl;
-                double accuracy=0.0;
+                double accuracy= crossValidation(dataset, currFeatures, -1);
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     deleteFeat = j;
@@ -150,3 +183,7 @@ int main(){
 
     return 0;
 }
+
+
+
+
