@@ -57,29 +57,40 @@ void printSampleData(const vector<DataPoint>& dataset){
 //using psdueo code and structure from Prof Eamonn's project 2 briefing
 double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFeat, int addFeat){
     int correctClassif=0;
+    //cout<< " CAN considered feat " << addFeat<< endl;
     for(int i =0; i<dataset.size();i++){
         const DataPoint& objToClassify=dataset[i];
         int trueClassification = objToClassify.label;
         double nnDistance = numeric_limits<double>::infinity();
         int nnLabel = -1;
+
         for(int j=0; j< dataset.size(); j++){
-            if(j ==1) continue;
-            vector<double> tempFeat = dataset[j].features;
-            for(int k = 0; k<tempFeat.size(); k++){
-                if((currFeat.count(k+1)==0 )&& (k+1!= addFeat)){
-                    tempFeat[k]=0;
+            if(j ==i) continue;
+
+            // vector<double> tempFeat = dataset[j].features;
+            // for(int k = 0; k<tempFeat.size(); k++){
+            //     if((currFeat.count(k+1)) || (k+1 == addFeat)){
+            //         tempFeat[k]=0;
+            //     }
+            // }
+            double distance =0.0;
+            for(int k=0; k< dataset[j].features.size(); k++){
+                if (currFeat.count(k + 1) || k + 1 == addFeat) { // Use only selected features
+                    double diff = objToClassify.features[k] - dataset[j].features[k];
+                    distance += diff * diff;
                 }
             }
-            double distance =0.0;
-            for(int k=0; k<tempFeat.size(); k++){
-                double diff= objToClassify.features[k] - tempFeat[k];
-                distance += diff * diff;
-            }
             distance= sqrt(distance);
+            if(distance < nnDistance){
+                nnDistance = distance;
+                nnLabel = dataset[j].label;
+            }
+        }
+        if(nnLabel == trueClassification){
+            correctClassif++;
         }
     }
-
-
+    cout<< "considered feat " << addFeat<< endl;
     return static_cast<double>(correctClassif)/dataset.size();
 }
 
@@ -88,9 +99,11 @@ void forwardSearch(const vector<DataPoint>& dataset){
     cout<< "Running Forward Search"<<endl;
     set<int>currFeatures;//empty set to start 
     int numFeatures= dataset[0].features.size();
+    set<int> bestFeatures; 
+    double bestAccuracy =0.0;
     for(int i=1; i<=numFeatures; i++){
         int addFeat = -1;
-        double currAccuracy =0; //current accuracy
+        double currAccuracy =0.0; //current accuracy
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j)==currFeatures.end()){
                 cout<< "--Considering adding feature"<<j<< endl;
@@ -104,8 +117,17 @@ void forwardSearch(const vector<DataPoint>& dataset){
         if(addFeat != -1){
             currFeatures.insert(addFeat);
             cout<<"On level "<< i << " I added feature "<< addFeat<<endl;
+            if(currAccuracy > bestAccuracy) {
+                bestAccuracy = currAccuracy;
+                bestFeatures = currFeatures;
+            }
         }
     }
+    cout<< "FEATURES ADDED: ";
+    for (int feat : currFeatures) {
+        cout << feat << " ";
+    }
+    cout<<endl;
     cout<< "End of Forward Search"<<endl;
 }
 
@@ -123,7 +145,7 @@ cout<< "Running Backwards Elimination"<<endl;
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j) !=currFeatures.end()){
                 cout<< "--Considering removing feature"<<j<< endl;
-                double accuracy= crossValidation(dataset, currFeatures, -1);
+                double accuracy= crossValidation(dataset, currFeatures, j);
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     deleteFeat = j;
@@ -179,7 +201,7 @@ int main(){
         return 0;
     }
 
-    printSampleData(dataset);//for debugign
+    //printSampleData(dataset);//for debugign
 
     return 0;
 }
