@@ -12,6 +12,9 @@ using namespace std;
 struct DataPoint{
     int label; //class 1 or 2 dep on first column of data set
     vector<double> features;  //feature vals
+    double operator[](int index) const {
+        return features[index];  //objToClassify[i] instead of objToClassify.features[i]
+    }
 };
 
 vector<DataPoint> readFile(const string& filename){
@@ -54,9 +57,44 @@ void printSampleData(const vector<DataPoint>& dataset){
     }
 }
 
+double findDistance(const DataPoint& objToClassify, const DataPoint& dataPoint){
+    double sum=0.0;
+    for (int i= 0; i<objToClassify.features.size(); i++){
+        sum +=pow(objToClassify[i] -dataPoint[i], 2);
+    }
+    return sqrt(sum);
+}
+
 //using psdueo code and structure from Prof Eamonn's project 2 briefing
 double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFeat, int addFeat){
-    
+    int correctlyClassified=0;
+    for(int i =0; i< dataset.size();i++){
+        const DataPoint& objToClassify = dataset[i]; 
+        int objLabel = objToClassify.label;
+        //cout<< "Looping over i, at the "<< i +1<< " location"<<endl;
+        //cout<< "The object is in class "<< objLabel<<endl;
+        double nnLabel = -1;
+        double nnDistance = numeric_limits<double>::infinity();
+        double nnLocation = numeric_limits<double>::infinity();
+        for(int j=1; j< dataset.size(); j++){
+            //cout<< "Ask if "<< i<< " is nearest neighbor with "<< j<< endl;
+            if(i !=j){
+                double distance = findDistance(objToClassify, dataset[j]);
+                if(distance < nnDistance){
+                    nnDistance = distance;
+                    nnLocation = j;
+                    nnLabel = dataset[nnLocation].label;
+                }
+            }
+        }
+        //cout<< "Object "<< i<< " is class "<< objToClassify.label<<endl;
+        //cout<< "Its nearest neighbor is "<< nnLocation<<" which is in class "<< nnLabel <<endl;
+        if(objLabel == nnLabel){
+            correctlyClassified = correctlyClassified +1;
+        }
+    }
+    double accuracy = correctlyClassified/ dataset.size();
+    return accuracy;
 }
 
 //using pseudo code and structure from Prof Eamonn's project 2 briefing
@@ -72,7 +110,7 @@ void forwardSearch(const vector<DataPoint>& dataset){
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j) == currFeatures.end()){
                 cout<< "--Considering adding feature"<<j<< endl;
-                double accuracy= 1; //crossValidation(dataset, currFeatures, j);
+                double accuracy= crossValidation(dataset, currFeatures, j);
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     addFeat= j;
@@ -100,7 +138,6 @@ cout<< "Running Backwards Elimination"<<endl;
         cout<< "On the "<< i<< "th level of the search tree"<<endl;
         int deleteFeat = -1;
         double currAccuracy =0.0; //current accuracy
-        
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j) !=currFeatures.end()){
                 cout<< "--Considering removing feature"<<j<< endl;
