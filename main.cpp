@@ -90,7 +90,7 @@ double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFea
             correctClassif++;
         }
     }
-    cout<< "considered feat " << addFeat<< endl;
+    //cout<< "considered feat " << addFeat<< endl;
     return static_cast<double>(correctClassif)/dataset.size();
 }
 
@@ -99,35 +99,26 @@ void forwardSearch(const vector<DataPoint>& dataset){
     cout<< "Running Forward Search"<<endl;
     set<int>currFeatures;//empty set to start 
     int numFeatures= dataset[0].features.size();
-    set<int> bestFeatures; 
-    double bestAccuracy =0.0;
+
     for(int i=1; i<=numFeatures; i++){
+        cout<< "On the "<< i<< "th level of the search tree"<<endl;
         int addFeat = -1;
         double currAccuracy =0.0; //current accuracy
         for(int j=1; j<=numFeatures; j++){
-            if(currFeatures.find(j)==currFeatures.end()){
+            if(currFeatures.find(j) == currFeatures.end()){
                 cout<< "--Considering adding feature"<<j<< endl;
-                double accuracy= crossValidation(dataset, currFeatures, j);
+                double accuracy= 1; //crossValidation(dataset, currFeatures, j);
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     addFeat= j;
                 }
             }
         }
-        if(addFeat != -1){
-            currFeatures.insert(addFeat);
-            cout<<"On level "<< i << " I added feature "<< addFeat<<endl;
-            if(currAccuracy > bestAccuracy) {
-                bestAccuracy = currAccuracy;
-                bestFeatures = currFeatures;
-            }
+        if(addFeat != -1) {
+            currFeatures.insert(addFeat);  //adding feat to CURRFEAT OMG TOOK FOREVER TO FIGRUE OUT IMMA CRAHSOUT 
         }
+        cout<< "On level "<< i << " i added feature "<< addFeat<< " to current set"<<endl;
     }
-    cout<< "FEATURES ADDED: ";
-    for (int feat : currFeatures) {
-        cout << feat << " ";
-    }
-    cout<<endl;
     cout<< "End of Forward Search"<<endl;
 }
 
@@ -139,13 +130,16 @@ cout<< "Running Backwards Elimination"<<endl;
     for(int i = 1; i<=numFeatures; i++){///adding features to the beginign so can delete
         currFeatures.insert(i);
     }
-    for(int i=numFeatures; i>0; i--){ // legit jsut opp of fowrads search
+
+    for(int i=numFeatures; i>=1; i--){ // legit jsut opp of fowrads search
+        cout<< "On the "<< i<< "th level of the search tree"<<endl;
         int deleteFeat = -1;
-        double currAccuracy =0; //current accuracy
+        double currAccuracy =0.0; //current accuracy
+        
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j) !=currFeatures.end()){
                 cout<< "--Considering removing feature"<<j<< endl;
-                double accuracy= crossValidation(dataset, currFeatures, j);
+                double accuracy= 1; //crossValidation(dataset, currFeatures, j);
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     deleteFeat = j;
