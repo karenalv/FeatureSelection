@@ -56,42 +56,7 @@ void printSampleData(const vector<DataPoint>& dataset){
 
 //using psdueo code and structure from Prof Eamonn's project 2 briefing
 double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFeat, int addFeat){
-    int correctClassif=0;
-    //cout<< " CAN considered feat " << addFeat<< endl;
-    for(int i =0; i<dataset.size();i++){
-        const DataPoint& objToClassify=dataset[i];
-        int trueClassification = objToClassify.label;
-        double nnDistance = numeric_limits<double>::infinity();
-        int nnLabel = -1;
-
-        for(int j=0; j< dataset.size(); j++){
-            if(j ==i) continue;
-
-            // vector<double> tempFeat = dataset[j].features;
-            // for(int k = 0; k<tempFeat.size(); k++){
-            //     if((currFeat.count(k+1)) || (k+1 == addFeat)){
-            //         tempFeat[k]=0;
-            //     }
-            // }
-            double distance =0.0;
-            for(int k=0; k< dataset[j].features.size(); k++){
-                if (currFeat.count(k + 1) || k + 1 == addFeat) { // Use only selected features
-                    double diff = objToClassify.features[k] - dataset[j].features[k];
-                    distance += diff * diff;
-                }
-            }
-            distance= sqrt(distance);
-            if(distance < nnDistance){
-                nnDistance = distance;
-                nnLabel = dataset[j].label;
-            }
-        }
-        if(nnLabel == trueClassification){
-            correctClassif++;
-        }
-    }
-    //cout<< "considered feat " << addFeat<< endl;
-    return static_cast<double>(correctClassif)/dataset.size();
+    
 }
 
 //using pseudo code and structure from Prof Eamonn's project 2 briefing
