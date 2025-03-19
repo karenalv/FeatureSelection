@@ -57,10 +57,10 @@ void printSampleData(const vector<DataPoint>& dataset){
     }
 }
 
-double findDistance(const DataPoint& objToClassify, const DataPoint& dataPoint){
+double findDistance(const DataPoint& objToClassify, const DataPoint& dataPoint, const set<int>& currFeat){
     double sum=0.0;
-    for (int i= 0; i<objToClassify.features.size(); i++){
-        sum +=pow(objToClassify[i] -dataPoint[i], 2);
+    for (int feat : currFeat){
+        sum +=pow(objToClassify[feat-1] -dataPoint[feat-1], 2);
     }
     return sqrt(sum);
 }
@@ -79,7 +79,7 @@ double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFea
         for(int j=1; j< dataset.size(); j++){
             //cout<< "Ask if "<< i<< " is nearest neighbor with "<< j<< endl;
             if(i !=j){
-                double distance = findDistance(objToClassify, dataset[j]);
+                double distance = findDistance(objToClassify, dataset[j], currFeat);
                 if(distance < nnDistance){
                     nnDistance = distance;
                     nnLocation = j;
@@ -93,7 +93,8 @@ double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFea
             correctlyClassified = correctlyClassified +1;
         }
     }
-    double accuracy = correctlyClassified/ dataset.size();
+    double accuracy = static_cast<double>(correctlyClassified)/dataset.size();
+    cout<< "Accuracy: "<< accuracy<<endl;
     return accuracy;
 }
 
@@ -102,6 +103,7 @@ void forwardSearch(const vector<DataPoint>& dataset){
     cout<< "Running Forward Search"<<endl;
     set<int>currFeatures;//empty set to start 
     int numFeatures= dataset[0].features.size();
+    double bestAccuracy =0.0;
 
     for(int i=1; i<=numFeatures; i++){
         cout<< "On the "<< i<< "th level of the search tree"<<endl;
@@ -110,18 +112,27 @@ void forwardSearch(const vector<DataPoint>& dataset){
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j) == currFeatures.end()){
                 cout<< "--Considering adding feature"<<j<< endl;
-                double accuracy= crossValidation(dataset, currFeatures, j);
+                set<int> tempSet = currFeatures;  //DEBUG
+                tempSet.insert(j); //DEBUG
+                double accuracy= crossValidation(dataset, tempSet, j);
+                cout << "Accuracy after adding feature " << j << ": " << accuracy << endl; //DEBUG
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     addFeat= j;
                 }
             }
         }
-        if(addFeat != -1) {
-            currFeatures.insert(addFeat);  //adding feat to CURRFEAT OMG TOOK FOREVER TO FIGRUE OUT IMMA CRAHSOUT 
+        if (addFeat != -1 && currAccuracy > bestAccuracy) {
+            currFeatures.insert(addFeat);  // Add the feature to the set
+            bestAccuracy = currAccuracy;  // Update the best accuracy
+            cout << "On level " << i << " I added feature " << addFeat << " to current set" << endl;
         }
-        cout<< "On level "<< i << " i added feature "<< addFeat<< " to current set"<<endl;
     }
+    cout << "Features added during Forward Search: ";
+    for (int feature : currFeatures) {
+        cout << feature << " ";
+    }
+    cout << endl;
     cout<< "End of Forward Search"<<endl;
 }
 
@@ -133,6 +144,7 @@ cout<< "Running Backwards Elimination"<<endl;
     for(int i = 1; i<=numFeatures; i++){///adding features to the beginign so can delete
         currFeatures.insert(i);
     }
+    double bestAccuracy=0.0;
 
     for(int i=numFeatures; i>=1; i--){ // legit jsut opp of fowrads search
         cout<< "On the "<< i<< "th level of the search tree"<<endl;
@@ -141,7 +153,10 @@ cout<< "Running Backwards Elimination"<<endl;
         for(int j=1; j<=numFeatures; j++){
             if(currFeatures.find(j) !=currFeatures.end()){
                 cout<< "--Considering removing feature"<<j<< endl;
-                double accuracy= 1; //crossValidation(dataset, currFeatures, j);
+                set<int> tempSet = currFeatures;  // Make a temporary copy of current features
+                tempSet.erase(j);
+                double accuracy= crossValidation(dataset, currFeatures, j);
+                cout << "Accuracy after removing feature " << j << ": " << accuracy << endl;
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
                     deleteFeat = j;
@@ -150,9 +165,15 @@ cout<< "Running Backwards Elimination"<<endl;
         }
         if(deleteFeat != -1){
             currFeatures.erase(deleteFeat);
+            bestAccuracy = currAccuracy;
             cout<<"On level "<< i << " I removed feature "<< deleteFeat<<endl;
         }
     }
+    cout << "Features remaining after Backwards Elimination: ";
+    for (int feature : currFeatures) {
+        cout << feature << " ";
+    }
+    cout << endl;
     cout<< "End of Backwards Elimination"<<endl;
 }
 
