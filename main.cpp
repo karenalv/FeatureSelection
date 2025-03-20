@@ -66,7 +66,7 @@ double findDistance(const DataPoint& objToClassify, const DataPoint& dataPoint, 
 }
 
 //using psdueo code and structure from Prof Eamonn's project 2 briefing
-double crossValidation(const vector<DataPoint>& dataset, const set<int>& currFeat, int addFeat){
+double crossValidation(const vector<DataPoint>& dataset, const set<int> currFeat, int addFeat){
     int correctlyClassified=0;
     for(int i =0; i< dataset.size();i++){
         const DataPoint& objToClassify = dataset[i]; 
