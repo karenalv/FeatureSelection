@@ -144,18 +144,18 @@ cout<< "Running Backwards Elimination"<<endl;
     for(int i = 1; i<=numFeatures; i++){///adding features to the beginign so can delete
         currFeatures.insert(i);
     }
-    double bestAccuracy=0.0;
-
+    double bestAccuracy=crossValidation(dataset,currFeatures, -1);
+    set<int> bestFeatureSet = currFeatures;
     for(int i=numFeatures; i>=1; i--){ // legit jsut opp of fowrads search
         cout<< "On the "<< i<< "th level of the search tree"<<endl;
         int deleteFeat = -1;
         double currAccuracy =0.0; //current accuracy
-        for(int j=1; j<=numFeatures; j++){
+        for(int j = 1; j <= numFeatures; j++){
             if(currFeatures.find(j) !=currFeatures.end()){
-                cout<< "--Considering removing feature"<<j<< endl;
+                cout<< "--Considering removing feature "<<j<< endl;
                 set<int> tempSet = currFeatures;  // Make a temporary copy of current features
                 tempSet.erase(j);
-                double accuracy= crossValidation(dataset, currFeatures, j);
+                double accuracy= crossValidation(dataset, tempSet, j);
                 cout << "Accuracy after removing feature " << j << ": " << accuracy << endl;
                 if(accuracy > currAccuracy){
                     currAccuracy= accuracy;
@@ -163,17 +163,19 @@ cout<< "Running Backwards Elimination"<<endl;
                 }
             }
         }
-        if(deleteFeat != -1){
+        if(deleteFeat != -1 && currAccuracy >=bestAccuracy){
             currFeatures.erase(deleteFeat);
             bestAccuracy = currAccuracy;
+            bestFeatureSet = currFeatures;
             cout<<"On level "<< i << " I removed feature "<< deleteFeat<<endl;
         }
     }
     cout << "Features remaining after Backwards Elimination: ";
-    for (int feature : currFeatures) {
+    for (int feature : bestFeatureSet) {
         cout << feature << " ";
     }
     cout << endl;
+    cout<< "Final accuracy: "<< bestAccuracy <<endl;
     cout<< "End of Backwards Elimination"<<endl;
 }
 
