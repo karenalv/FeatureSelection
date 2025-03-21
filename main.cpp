@@ -7,6 +7,7 @@
 #include <limits>
 using namespace std;
 
+
 struct DataPoint{
     int label; //class 1 or 2 dep on first column of data set
     vector<double> features;  //feature vals
@@ -23,7 +24,6 @@ vector<DataPoint> readFile(const string& filename){
     }
     vector<DataPoint> dataset;
     string line;
-
     while (getline(file, line)){  //read line by line
         stringstream ss(line);
         DataPoint data;
@@ -178,7 +178,6 @@ cout<< "Running Backwards Elimination"<<endl;
     cout<< "End of Backwards Elimination"<<endl;
 }
 
-
 int main(){
     cout<< "Feature Selection with Nearest Neighbor"<<endl;
     cout<< "Please choose which search you would like to try:"<<endl;
@@ -186,16 +185,12 @@ int main(){
     int userInput;
     cin>> userInput;
     cout<<endl;
-
     cout<< "Please choose which data set you would like to use:"<<endl;
     cout<< "1. Small Dataset"<<endl<< "2. Large Dataset"<<endl;
     int dataChoice;
     cin>> dataChoice;
     cout<<endl;
-
-
     vector<DataPoint> dataset;
-
     if(dataChoice==1){
         dataset = readFile("CS170_Small_Data__74.txt");
     }
@@ -206,8 +201,6 @@ int main(){
         cout<< "Invalid dataset choice."<<endl;
         return 0;
     }
-    
-
     if(userInput==1){
         //FORWARD SEARCH
         forwardSearch(dataset);
@@ -218,9 +211,7 @@ int main(){
         cout<< "Invalid input"<<endl;
         return 0;
     }
-
-    //printSampleData(dataset);//for debugign
-
+    
     return 0;
 }
 
